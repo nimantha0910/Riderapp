@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "16696135279",
+    "project_id": "rider-app-29f66",
+    "storage_bucket": "rider-app-29f66.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:16696135279:android:e08e8eaa5cd172e7b5879a",
+        "android_client_info": {
+          "package_name": "com.nimantha.riderapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "16696135279-vl83nalldtb637iv4h2potkfb8qf12nn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-dPEeTK3Kt1mxUiu3kgZOP2ZICbKqu1w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "16696135279-vl83nalldtb637iv4h2potkfb8qf12nn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
