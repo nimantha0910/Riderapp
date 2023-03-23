@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/src/material/icons.dart';
-import '../AllWidgets/Divider.dart';
+import 'package:provider/provider.dart';
+import 'package:riderapp/AllScreens/searchScreen.dart';
+import 'package:riderapp/Assistants/assistantMethods.dart';
+import 'package:riderapp/DataHandler/appData.dart';
 
 class MainScreen extends StatefulWidget {
   static const String idScreen = "mainScreen";
@@ -16,13 +20,46 @@ class _MainScreenState extends State<MainScreen> {
   late GoogleMapController newGoogleMapController;
 
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
+
+  late Position currentPosition;
+  var geoLocator = Geolocator();
+  double bottomPaddingOfMap = 0;
+
+  Future<Object> locatePosition() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    currentPosition = position;
+    LatLng latLatPosition = LatLng(position.latitude, position.longitude);
+    CameraPosition cameraPosition =
+        new CameraPosition(target: latLatPosition, zoom: 14);
+    newGoogleMapController
+        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+    String address =
+        await AssistantMethods.searchCoordinateAddress(position, context);
+    print("This is your address : " + address);
+    log('address');
+    log(address);
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error("Location permission are denied");
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          "Location permission are permanently denied, we cant request");
+    }
+    return await Geolocator.getCurrentPosition();
+  }
 
   @override
   Widget build(BuildContext context) {
+    CameraPosition _kGooglePlex = const CameraPosition(
+      target: LatLng(37.42796133580664, -122.085749655962),
+      zoom: 14.0,
+    );
     return Scaffold(
         key: scaffoldKey,
         appBar: AppBar(
@@ -65,7 +102,6 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
 
-                DividerWidget(),
                 SizedBox(
                   height: 12.0,
                 ),
@@ -98,12 +134,22 @@ class _MainScreenState extends State<MainScreen> {
         body: Stack(
           children: [
             GoogleMap(
+              padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
               mapType: MapType.normal,
               myLocationButtonEnabled: true,
               initialCameraPosition: _kGooglePlex,
+              myLocationEnabled: true,
+              zoomGesturesEnabled: true,
+              zoomControlsEnabled: true,
               onMapCreated: (GoogleMapController controller) {
                 _controllerGoogleMap.complete(controller);
                 newGoogleMapController = controller;
+
+                setState(() {
+                  bottomPaddingOfMap = 300.0;
+                });
+
+                locatePosition();
               },
             ),
 
@@ -115,29 +161,37 @@ class _MainScreenState extends State<MainScreen> {
                 onTap: () {
                   scaffoldKey.currentState?.openDrawer();
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(22.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black,
-                        blurRadius: 6.0,
-                        spreadRadius: 0.5,
-                        offset: Offset(
-                          0.7,
-                          0.7,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SearchScreen()));
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black,
+                          blurRadius: 6.0,
+                          spreadRadius: 0.5,
+                          offset: Offset(
+                            0.7,
+                            0.7,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.menu,
-                      color: Colors.black,
+                      ],
                     ),
-                    radius: 20.0,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.menu,
+                        color: Colors.black,
+                      ),
+                      radius: 20.0,
+                    ),
                   ),
                 ),
               ),
@@ -148,7 +202,7 @@ class _MainScreenState extends State<MainScreen> {
                 right: 0.0,
                 bottom: 0.0,
                 child: Container(
-                  height: 320.0,
+                  height: 300.0,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -228,7 +282,19 @@ class _MainScreenState extends State<MainScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Add Home"),
+                                Text(Provider.of<AppData>(context)
+                                            .pickUpLocation !=
+                                        null
+                                    ? Provider.of<AppData>(context)
+                                        .pickUpLocation
+                                        .placeName
+                                    : "Add Home"),
+                                Text(
+                                  Provider.of<AppData>(context)
+                                      .pickUpLocation
+                                      .placeName,
+                                  style: TextStyle(color: Colors.red),
+                                ),
                                 SizedBox(
                                   height: 4.0,
                                 ),
@@ -244,7 +310,6 @@ class _MainScreenState extends State<MainScreen> {
                         SizedBox(
                           height: 10.0,
                         ),
-                        DividerWidget(),
                         SizedBox(
                           height: 16.0,
                         ),
