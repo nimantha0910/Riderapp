@@ -25,7 +25,7 @@ class _MainScreenState extends State<MainScreen> {
   var geoLocator = Geolocator();
   double bottomPaddingOfMap = 0;
 
-  Future<Object> locatePosition() async {
+  void locatePosition() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     currentPosition = position;
@@ -40,26 +40,31 @@ class _MainScreenState extends State<MainScreen> {
     print("This is your address : " + address);
     log('address');
     log(address);
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error("Location permission are denied");
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          "Location permission are permanently denied, we cant request");
-    }
-    return await Geolocator.getCurrentPosition();
+    // LocationPermission permission = await Geolocator.checkPermission();
+    // if (permission == LocationPermission.denied) {
+    //   permission = await Geolocator.requestPermission();
+    //   if (permission == LocationPermission.denied) {
+    //     return Future.error("Location permission are denied");
+    //   }
+    // }
+    // if (permission == LocationPermission.deniedForever) {
+    //   return Future.error(
+    //       "Location permission are permanently denied, we cant request");
+    // }
+    // return await Geolocator.getCurrentPosition();
   }
+
+  static final CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.0,
+  );
 
   @override
   Widget build(BuildContext context) {
-    CameraPosition _kGooglePlex = const CameraPosition(
-      target: LatLng(37.42796133580664, -122.085749655962),
-      zoom: 14.0,
-    );
+    // CameraPosition _kGooglePlex = const CameraPosition(
+    //   target: LatLng(37.42796133580664, -122.085749655962),
+    //   zoom: 14.0,
+    // );
     return Scaffold(
         key: scaffoldKey,
         appBar: AppBar(
@@ -161,37 +166,36 @@ class _MainScreenState extends State<MainScreen> {
                 onTap: () {
                   scaffoldKey.currentState?.openDrawer();
                 },
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SearchScreen()));
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black,
-                          blurRadius: 6.0,
-                          spreadRadius: 0.5,
-                          offset: Offset(
-                            0.7,
-                            0.7,
-                          ),
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.menu,
+                // child: GestureDetector(
+                //   onTap: () {
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //             builder: (context) => SearchScreen()));
+                //   },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5.0),
+                    boxShadow: [
+                      BoxShadow(
                         color: Colors.black,
+                        blurRadius: 6.0,
+                        spreadRadius: 0.5,
+                        offset: Offset(
+                          0.7,
+                          0.7,
+                        ),
                       ),
-                      radius: 20.0,
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.menu,
+                      color: Colors.black,
                     ),
+                    radius: 20.0,
                   ),
                 ),
               ),
@@ -238,32 +242,40 @@ class _MainScreenState extends State<MainScreen> {
                         SizedBox(
                           height: 20.0,
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(5.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black54,
-                                blurRadius: 16.0,
-                                spreadRadius: 0.5,
-                                offset: Offset(0.7, 0.7),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.search,
-                                  color: Colors.blueAccent,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SearchScreen()));
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(5.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black54,
+                                  blurRadius: 16.0,
+                                  spreadRadius: 0.5,
+                                  offset: Offset(0.7, 0.7),
                                 ),
-                                SizedBox(
-                                  width: 10.0,
-                                ),
-                                Text("Search Drop Off"),
                               ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.search,
+                                    color: Colors.blueAccent,
+                                  ),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text("Search Drop Off"),
+                                ],
+                              ),
                             ),
                           ),
                         ),
