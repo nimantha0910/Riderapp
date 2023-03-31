@@ -301,12 +301,12 @@ class _MainScreenState extends State<MainScreen> {
                                         .pickUpLocation
                                         .placeName
                                     : "Add Home"),
-                                Text(
-                                  Provider.of<AppData>(context)
-                                      .pickUpLocation
-                                      .placeName,
-                                  style: TextStyle(color: Colors.red),
-                                ),
+                                // Text(
+                                //   Provider.of<AppData>(context)
+                                //       .pickUpLocation
+                                //       .placeName,
+                                //   style: TextStyle(color: Colors.red),
+                                // ),
                                 SizedBox(
                                   height: 4.0,
                                 ),
