@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:riderapp/Assistants/requestAssistant.dart';
 import 'package:riderapp/DataHandler/appData.dart';
+import 'package:riderapp/Models/placePredection.dart';
+import 'package:riderapp/configMaps.dart';
 
 class SearchScreen extends StatefulWidget {
   //const SearchScreen({super.key});
@@ -117,6 +120,9 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: Padding(
                           padding: EdgeInsets.all(3.0),
                           child: TextField(
+                            onChanged: (val) {
+                              findPlace(val);
+                            },
                             controller: dropOffTextEditingController,
                             decoration: InputDecoration(
                               hintText: "Where to?",
@@ -139,5 +145,34 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       ]),
     );
+  }
+
+  void findPlace(String placeName) async {
+    if (placeName.length > 1) {
+      String autoCompleteUrl =
+          "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&key=$mapKey&sessiontoken=1234567890&components=country:lk";
+
+      var res = await RequestAssistant.getRequest(autoCompleteUrl);
+
+      if (res == "failed") {
+        return;
+      }
+      if (res["status"] == "OK") {
+        var predictions = res["predictions"];
+
+        var placeList = (predictions as List)
+            .map((e) => PlacePredictions.fromJson(e))
+            .toList();
+      }
+    }
+  }
+}
+
+class PredictionTile extends StatelessWidget {
+  //const MyWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
