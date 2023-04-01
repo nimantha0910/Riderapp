@@ -219,7 +219,7 @@ class PredictionTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: 8.0,
+                      height: 4.0,
                     ),
                     Text(
                       placePredictions.main_text,
@@ -235,7 +235,7 @@ class PredictionTile extends StatelessWidget {
                       style: TextStyle(fontSize: 12.0, color: Colors.grey),
                     ),
                     SizedBox(
-                      height: 8.0,
+                      height: 4.0,
                     ),
                   ],
                 ),
