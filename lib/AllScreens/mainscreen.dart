@@ -26,20 +26,26 @@ class _MainScreenState extends State<MainScreen> {
   double bottomPaddingOfMap = 0;
 
   void locatePosition() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    currentPosition = position;
-    LatLng latLatPosition = LatLng(position.latitude, position.longitude);
-    CameraPosition cameraPosition =
-        new CameraPosition(target: latLatPosition, zoom: 14);
-    newGoogleMapController
-        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    log('satarted calling the function');
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      currentPosition = position;
+      LatLng latLatPosition = LatLng(position.latitude, position.longitude);
+      CameraPosition cameraPosition =
+          new CameraPosition(target: latLatPosition, zoom: 14);
+      newGoogleMapController
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      log('running ');
 
-    String address =
-        await AssistantMethods.searchCoordinateAddress(position, context);
-    print("This is your address : " + address);
-    log('address');
-    log(address);
+      String address =
+          await AssistantMethods.searchCoordinateAddress(position, context);
+      print("This is your address : " + address);
+      log('address');
+      log(address);
+    } catch (e) {
+      return Future.error(e);
+    }
     // LocationPermission permission = await Geolocator.checkPermission();
     // if (permission == LocationPermission.denied) {
     //   permission = await Geolocator.requestPermission();
@@ -148,10 +154,10 @@ class _MainScreenState extends State<MainScreen> {
               zoomControlsEnabled: true,
               onMapCreated: (GoogleMapController controller) {
                 _controllerGoogleMap.complete(controller);
-                newGoogleMapController = controller;
 
                 setState(() {
                   bottomPaddingOfMap = 300.0;
+                  newGoogleMapController = controller;
                 });
 
                 locatePosition();
@@ -294,13 +300,16 @@ class _MainScreenState extends State<MainScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Text(Provider.of<AppData>(context)
+                                //             .pickUpLocation !=
+                                //         null
+                                //     ? Provider.of<AppData>(context)
+                                //         .pickUpLocation
+                                //         .placeName
+                                //     : "Add Home"),
                                 Text(Provider.of<AppData>(context)
-                                            .pickUpLocation !=
-                                        null
-                                    ? Provider.of<AppData>(context)
-                                        .pickUpLocation
-                                        .placeName
-                                    : "Add Home"),
+                                    .pickUpLocation
+                                    .placeName),
                                 // Text(
                                 //   Provider.of<AppData>(context)
                                 //       .pickUpLocation

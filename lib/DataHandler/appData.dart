@@ -5,7 +5,7 @@ import 'package:riderapp/Models/address.dart';
 class AppData extends ChangeNotifier {
   Address pickUpLocation = new Address(
       placeFormattedAddress: "",
-      placeName: "",
+      placeName: "Tezt location name",
       placeId: "",
       latitude: 0.0,
       longitude: 0.0);
