@@ -284,8 +284,8 @@ class PredictionTile extends StatelessWidget {
           placeFormattedAddress: "",
           placeName: "",
           placeId: "",
-          latitude: 0,
-          longitude: 0);
+          latitude: 0.0,
+          longitude: 0.0);
 
       address.placeName = res["result"]["name"];
       address.placeId = placeId;
@@ -296,6 +296,8 @@ class PredictionTile extends StatelessWidget {
           .updateDropOffLocationAddress(address);
       print("This is Drop Off Location :: ");
       print(address.placeName);
+
+      Navigator.pop(context, "obtainDirection");
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:riderapp/AllScreens/searchScreen.dart';
+import 'package:riderapp/AllWidgets/progressDialog.dart';
 import 'package:riderapp/Assistants/assistantMethods.dart';
 import 'package:riderapp/DataHandler/appData.dart';
 
@@ -250,11 +251,15 @@ class _MainScreenState extends State<MainScreen> {
                             height: 20.0,
                           ),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              var res = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => SearchScreen()));
+
+                              if (res == "obtainDirection") {
+                                await getPlaceDirecton();
+                              }
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -367,5 +372,29 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ));
+  }
+
+  Future<void> getPlaceDirecton() async {
+    var initialPos =
+        Provider.of<AppData>(context, listen: false).pickUpLocation;
+
+    var finalPos = Provider.of<AppData>(context, listen: false).dropOffLocation;
+
+    var pickUpLatLng = LatLng(initialPos.latitude, initialPos.longitude);
+    var dropOffLatLng = LatLng(finalPos.latitude, finalPos.longitude);
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => progressDialog(
+              message: "Please wait...",
+            ));
+
+    var details = await AssistantMethods.obtainPlaceDirectionDetails(
+        pickUpLatLng, dropOffLatLng);
+
+    Navigator.pop(context);
+
+    print("This is encoded points ::");
+    print(details?.encodedPoints);
   }
 }
