@@ -388,11 +388,12 @@ class _MainScreenState extends State<MainScreen> {
         builder: (BuildContext context) => progressDialog(
               message: "Please wait...",
             ));
-
+    Navigator.pop(context);
+    log('details');
     var details = await AssistantMethods.obtainPlaceDirectionDetails(
         pickUpLatLng, dropOffLatLng);
-
-    Navigator.pop(context);
+    log('details');
+    log(details.toString());
 
     print("This is encoded points ::");
     print(details?.encodedPoints);

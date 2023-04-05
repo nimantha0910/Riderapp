@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -268,24 +270,29 @@ class PredictionTile extends StatelessWidget {
         builder: (BuildContext context) => progressDialog(
               message: "Setting Dropoff, Please wait...",
             ));
+    log("step1");
 
     String placeDetailsUrl =
         "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$mapKey";
 
     var res = await RequestAssistant.getRequest(placeDetailsUrl);
+    log("step2");
 
     Navigator.pop(context);
 
     if (res == "failed") {
+      log("step3");
       return;
     }
     if (res["status"] == "OK") {
+      log("step4");
+
       Address address = Address(
           placeFormattedAddress: "",
-          placeName: "",
-          placeId: "",
           latitude: 0.0,
-          longitude: 0.0);
+          longitude: 0.0,
+          placeId: '',
+          placeName: '');
 
       address.placeName = res["result"]["name"];
       address.placeId = placeId;
