@@ -82,4 +82,11 @@ class AssistantMethods {
 
     return directionDetails;
   }
+
+  //static int calculateFarse(DirectionDetails directionDetails) {
+  //in terms Ruppees
+  //double timeTravelFare = (directionDetails.durationValue / 60) * 500;
+  // distanceTravelFare = (directionDetails.distanceValue / 10000) * 0.20;
+  //return 0;
+//}
 }
