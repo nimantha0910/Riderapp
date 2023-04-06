@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  //DirectionDetails tripDirectionDetails;
+  DirectionDetails? tripDirectionDetails;
 
   List<LatLng> pLineCoordinates = [];
   Set<Polyline> polylineSet = {};
@@ -63,10 +63,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   void displayRequestRideConatiner() {
-    requestRideContainerHeight = 250.0;
-    rideDetailsContainerHeight = 0;
-    bottomPaddingOfMap = 230.0;
-    drawerOpen = true;
+    log("x1");
+
+    setState(() {
+      requestRideContainerHeight = 250.0;
+      rideDetailsContainerHeight = 0;
+      bottomPaddingOfMap = 230.0;
+      drawerOpen = true;
+    });
   }
 
   void displayRideDetailsContainer() async {
@@ -494,7 +498,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         ),
                                       ),
                                       Text(
-                                        "distance",
+                                        ((tripDirectionDetails != null)
+                                            ? tripDirectionDetails!.distanceText
+                                            : ""),
                                         style: TextStyle(
                                           fontSize: 16.0,
                                           color: Colors.grey,
@@ -686,9 +692,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     log('details');
     var details = await AssistantMethods.obtainPlaceDirectionDetails(
         pickUpLatLng, dropOffLatLng);
-    //setState(() {
-    //tripDirectionDetails = details!;
-    //});
+    setState(() {
+      tripDirectionDetails = details!;
+    });
     log('details');
     log(details.toString());
 
