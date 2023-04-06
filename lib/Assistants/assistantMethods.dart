@@ -1,7 +1,10 @@
 //import 'dart:js';
 
 import 'dart:developer';
+import 'dart:html';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:riderapp/Assistants/requestAssistant.dart';
 import 'package:riderapp/DataHandler/appData.dart';
 import 'package:riderapp/Models/address.dart';
+import 'package:riderapp/Models/allUsers.dart';
 import 'package:riderapp/Models/directionDetails.dart';
 import 'package:riderapp/configMaps.dart';
 
@@ -83,10 +87,25 @@ class AssistantMethods {
     return directionDetails;
   }
 
-  //static int calculateFarse(DirectionDetails directionDetails) {
-  //in terms Ruppees
-  //double timeTravelFare = (directionDetails.durationValue / 60) * 500;
-  // distanceTravelFare = (directionDetails.distanceValue / 10000) * 0.20;
-  //return 0;
-//}
+  static void getCurrentOnlineUserInfo() async {
+    firebaseUser = await FirebaseAuth.instance.currentUser;
+    String? userId = firebaseUser?.uid;
+    DatabaseReference reference =
+        FirebaseDatabase.instance.reference().child("users").child(userId!);
+
+    // async methods should return a future
+    Future<void> getCurrentOnLineUserInfo() async {
+      firebaseUser = await FirebaseAuth.instance.currentUser;
+      String userId = firebaseUser!.uid;
+      DatabaseReference reference =
+          FirebaseDatabase.instance.ref().child("user").child(userId);
+
+      final snapshot =
+          await reference.get(); // you should use await on async methods
+      if (snapshot!.value != null) {
+        userCurrentInfo = Users.fromSnapshot(snapshot);
+      }
+      ;
+    }
+  }
 }

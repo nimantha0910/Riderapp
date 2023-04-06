@@ -16,7 +16,7 @@ void main() async {
 DatabaseReference userRef = FirebaseDatabase.instance.ref().child("users");
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  // This widget is the root of your a1pplication.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.blue,
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
-          initialRoute: MainScreen.idScreen,
+          initialRoute: loginScreen.idScreen,
           routes: {
             registrationScreen.idScreen: (context) => registrationScreen(),
             loginScreen.idScreen: (context) => loginScreen(),
