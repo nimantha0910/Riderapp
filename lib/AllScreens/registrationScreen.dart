@@ -7,7 +7,6 @@ import "package:fluttertoast/fluttertoast.dart";
 import "package:riderapp/AllScreens/loginScreen.dart";
 import 'package:http/http.dart' as http;
 import "package:riderapp/main.dart";
-
 import "mainscreen.dart";
 
 class registrationScreen extends StatelessWidget {
@@ -30,7 +29,7 @@ class registrationScreen extends StatelessWidget {
             height: 45.0,
           ),
           Image(
-            image: AssetImage("assets/images/logo.png"),
+            image: AssetImage("assets/images/logo2.png"),
             width: 390.0,
             height: 200.0,
             alignment: Alignment.center,

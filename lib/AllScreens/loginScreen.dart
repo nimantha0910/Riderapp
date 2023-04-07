@@ -25,7 +25,7 @@ class loginScreen extends StatelessWidget {
             height: 45.0,
           ),
           Image(
-            image: AssetImage("assets/images/logo.png"),
+            image: AssetImage("assets/images/logo2.png"),
             width: 390.0,
             height: 200.0,
             alignment: Alignment.center,
@@ -34,7 +34,7 @@ class loginScreen extends StatelessWidget {
             height: 1.0,
           ),
           Text(
-            "Login as a Rider",
+            "Login as a Driver",
             style: TextStyle(fontSize: 24.0, fontFamily: "Brand Bold"),
             textAlign: TextAlign.center,
           ),
