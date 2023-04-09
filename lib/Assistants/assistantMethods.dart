@@ -1,6 +1,7 @@
 //import 'dart:js';
 
 import 'dart:developer';
+import 'dart:math';
 //import 'dart:html';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,7 +26,7 @@ class AssistantMethods {
         "https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$mapKey";
 
     var response = await RequestAssistant.getRequest(url);
-    log(response.toString());
+    //log(response.toString());
 
     if (response != "failed") {
       st1 = response["results"][0]["address_components"][0]["long_name"];
@@ -34,7 +35,7 @@ class AssistantMethods {
       st4 = response["results"][0]["address_components"][3]["long_name"];
       placeAddress = st2 + ", " + st3 + ", " + st4;
 
-      log(position.latitude.toString() + position.longitude.toString());
+      //log(position.latitude.toString() + position.longitude.toString());
       Address userPickUpAddress = new Address(
           placeFormattedAddress: "",
           placeName: "",
@@ -107,5 +108,11 @@ class AssistantMethods {
       }
       ;
     }
+  }
+
+  static double createRandomNumber(int num) {
+    var random = Random();
+    int radNumber = random.nextInt(num);
+    return radNumber.toDouble();
   }
 }

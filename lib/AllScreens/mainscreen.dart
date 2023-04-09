@@ -5,6 +5,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,8 +16,10 @@ import 'package:riderapp/AllScreens/loginScreen.dart';
 import 'package:riderapp/AllScreens/searchScreen.dart';
 import 'package:riderapp/AllWidgets/progressDialog.dart';
 import 'package:riderapp/Assistants/assistantMethods.dart';
+import 'package:riderapp/Assistants/geoFireAssistant.dart';
 import 'package:riderapp/DataHandler/appData.dart';
 import 'package:riderapp/Models/directionDetails.dart';
+import 'package:riderapp/Models/nearbyAvailableDrivers.dart';
 import 'package:riderapp/configMaps.dart';
 
 class MainScreen extends StatefulWidget {
@@ -49,8 +52,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   double searchContainerHeight = 300.0;
 
   bool drawerOpen = true;
+  bool nearByAvailableDriversKeyLoaded = false;
 
   late DatabaseReference rideRequestRef;
+
+  //late BitmapDescriptor nearByIcon; //reminder
 
   void initState() {
     super.initState();
@@ -165,6 +171,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     //       "Location permission are permanently denied, we cant request");
     // }
     // return await Geolocator.getCurrentPosition();
+
+    initGeoFireListner();
   }
 
   static final CameraPosition _kGooglePlex = CameraPosition(
@@ -174,6 +182,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    //createIconMarker();
     // CameraPosition _kGooglePlex = const CameraPosition(
     //   target: LatLng(37.42796133580664, -122.085749655962),
     //   zoom: 14.0,
@@ -865,4 +874,91 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       circlesSet.add(dropOffLocCircle);
     });
   }
+
+  void initGeoFireListner() {
+    Geofire.initialize("availableDrivers");
+    Geofire.queryAtLocation(
+            currentPosition.latitude, currentPosition.longitude, 15)
+        ?.listen((map) {
+      print(map);
+      if (map != null) {
+        var callBack = map['callBack'];
+
+        //latitude will be retrieved from map['latitude']
+        //longitude will be retrieved from map['longitude']
+
+        switch (callBack) {
+          case Geofire.onKeyEntered:
+            NearbyAvailableDrivers nearbyAvailableDrivers =
+                NearbyAvailableDrivers(key: "", latitude: 0.0, longitude: 0.0);
+            nearbyAvailableDrivers.key = map['key'];
+            nearbyAvailableDrivers.latitude = map['latitude'];
+            nearbyAvailableDrivers.longitude = map['longitude'];
+            GeoFireAssistant.nearByAvailableDriversList
+                .add(nearbyAvailableDrivers);
+            if (nearByAvailableDriversKeyLoaded == true) {
+              updateAvailableDriversOnMap();
+            }
+            break;
+
+          case Geofire.onKeyExited:
+            GeoFireAssistant.removeDriverFromList(map['key']);
+            updateAvailableDriversOnMap();
+            break;
+
+          case Geofire.onKeyMoved:
+            NearbyAvailableDrivers nearbyAvailableDrivers =
+                NearbyAvailableDrivers(key: "", latitude: 0.0, longitude: 0.0);
+            nearbyAvailableDrivers.key = map['key'];
+            nearbyAvailableDrivers.latitude = map['latitude'];
+            nearbyAvailableDrivers.longitude = map['longitude'];
+            GeoFireAssistant.updateDriverNearByLocation(nearbyAvailableDrivers);
+            updateAvailableDriversOnMap();
+            break;
+
+          case Geofire.onGeoQueryReady:
+            updateAvailableDriversOnMap();
+            break;
+        }
+      }
+
+      setState(() {});
+    });
+  }
+
+  void updateAvailableDriversOnMap() {
+    setState(() {
+      markersSet.clear();
+    });
+
+    Set<Marker> tMakers = Set<Marker>();
+    for (NearbyAvailableDrivers driver
+        in GeoFireAssistant.nearByAvailableDriversList) {
+      LatLng driverAvailablePosition =
+          LatLng(driver.latitude, driver.longitude);
+
+      Marker marker = Marker(
+        markerId: MarkerId('driver${driver.key}'),
+        position: driverAvailablePosition,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        rotation: AssistantMethods.createRandomNumber(360),
+      );
+      tMakers.add(marker);
+    }
+    setState(() {
+      markersSet = tMakers;
+    });
+  }
+
+  // void createIconMarker() {
+  //   if (nearByIcon == null) {
+  //     ImageConfiguration imageConfiguration =
+  //         createLocalImageConfiguration(context, size: Size(2, 2));
+  //     BitmapDescriptor.fromAssetImage(
+  //             imageConfiguration, "assets/images/car_android.png")
+  //         .then((value) {
+  //       nearByIcon = value;
+  //     });
+  //   }
+  // }
 }
