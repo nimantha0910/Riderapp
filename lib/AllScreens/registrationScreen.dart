@@ -38,7 +38,7 @@ class registrationScreen extends StatelessWidget {
             height: 1.0,
           ),
           Text(
-            "Register as a Rider",
+            "Register as a Driver",
             style: TextStyle(fontSize: 24.0, fontFamily: "Brand Bold"),
             textAlign: TextAlign.center,
           ),
