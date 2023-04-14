@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 //import 'dart:html';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -21,6 +22,8 @@ import 'package:riderapp/DataHandler/appData.dart';
 import 'package:riderapp/Models/directionDetails.dart';
 import 'package:riderapp/Models/nearbyAvailableDrivers.dart';
 import 'package:riderapp/configMaps.dart';
+import 'dart:ui' as ui;
+import 'package:http/http.dart' as http;
 
 class MainScreen extends StatefulWidget {
   static const String idScreen = "mainScreen";
@@ -32,6 +35,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final Completer<GoogleMapController> _controllerGoogleMap =
       Completer<GoogleMapController>();
   late GoogleMapController newGoogleMapController;
+  var drivers = [];
+  bool isAccepted = false;
 
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -59,17 +64,33 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   //late BitmapDescriptor nearByIcon; //reminder
 
   void initState() {
+    getAllDriverDetails();
     super.initState();
     AssistantMethods.getCurrentOnlineUserInfo();
   }
 
-  void saveRideRequest() {
+  void saveRideRequest() async {
     rideRequestRef =
         FirebaseDatabase.instance.reference().child("Ride Request").push();
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     var pickUp = Provider.of<AppData>(context, listen: false).pickUpLocation;
     var dropOff = Provider.of<AppData>(context, listen: false).dropOffLocation;
-
+    late http.Response response;
+    var user = [];
+    var myCurrentUserData = [];
+    const url = 'https://rider-app-29f66-default-rtdb.firebaseio.com/user.json';
+    response = await http.get(Uri.parse(url));
+    Map body = json.decode(response.body);
+    body.forEach((key, value) {
+      user.add(value);
+    });
+    for (var item in user) {
+      if (_firebaseAuth.currentUser!.email == item['email']) {
+        myCurrentUserData.add(item);
+      }
+    }
+    log(myCurrentUserData.toString());
     Map pickUpLocMap = {
       "latitude": pickUp.latitude.toString(),
       "longitude": pickUp.longitude.toString(),
@@ -82,6 +103,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
     Map rideinfoMap = {
       "driver_id": "waiting",
+      "userDetails": myCurrentUserData,
       "payment_method": "cash",
       "pickup": pickUpLocMap,
       "dropoff": dropOffLocMap,
@@ -653,103 +675,153 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-
-              Positioned(
-                bottom: 0.0,
-                left: 0.0,
-                right: 0.0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16.0),
-                      topRight: Radius.circular(16.0),
-                    ),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        spreadRadius: 0.5,
-                        blurRadius: 16.0,
-                        color: Colors.black54,
-                        offset: Offset(0.7, 0.7),
-                      ),
-                    ],
-                  ),
-                  height: requestRideContainerHeight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(30.0),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 12.0,
+              isAccepted == true
+                  ? Positioned(
+                      bottom: 20,
+                      left: 20,
+                      right: 20,
+                      child: Container(
+                        width: double.infinity,
+                        height: 50.0,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(20.0),
                         ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ColorizeAnimatedTextKit(
-                            onTap: () {
-                              print("Tap Event");
-                            },
-
-                            text: [
-                              "Requesting a Car Park...",
-                              "Please Wait...",
-                              "Finding a Car Park...",
-                            ],
-                            textStyle: TextStyle(
-                                fontSize: 40.0, fontFamily: "Signatra"),
-                            colors: [
-                              Colors.green,
-                              Colors.purple,
-                              Colors.pink,
-                              Colors.blue,
-                              Colors.yellow,
-                              Colors.red,
-                            ],
-                            textAlign: TextAlign.center,
-                            //alignment: AlignmentDirectional.topStart
-                          ),
-                        ),
-                        SizedBox(
-                          height: 22.0,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            cancelRideRequest();
-                            resetApp();
-                          },
-                          child: Container(
-                            height: 60.0,
-                            width: 60.0,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(26.0),
-                              border:
-                                  Border.all(width: 2.0, color: Colors.grey),
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 26.0,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        Container(
-                          width: double.infinity,
+                        child: Center(
                           child: Text(
-                            "Cancel Search",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12.0),
+                            'Accepted',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
+                      ),
+                    )
+                  : Positioned(
+                      bottom: 0.0,
+                      left: 0.0,
+                      right: 0.0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16.0),
+                            topRight: Radius.circular(16.0),
+                          ),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              spreadRadius: 0.5,
+                              blurRadius: 16.0,
+                              color: Colors.black54,
+                              offset: Offset(0.7, 0.7),
+                            ),
+                          ],
+                        ),
+                        height: requestRideContainerHeight,
+                        child: Padding(
+                          padding: const EdgeInsets.all(30.0),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 12.0,
+                              ),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ColorizeAnimatedTextKit(
+                                  onTap: () {
+                                    print("Tap Event");
+                                  },
+
+                                  text: [
+                                    "Requesting a Car Park...",
+                                    "Please Wait...",
+                                    "Finding a Car Park...",
+                                  ],
+                                  textStyle: TextStyle(
+                                      fontSize: 40.0, fontFamily: "Signatra"),
+                                  colors: [
+                                    Colors.green,
+                                    Colors.purple,
+                                    Colors.pink,
+                                    Colors.blue,
+                                    Colors.yellow,
+                                    Colors.red,
+                                  ],
+                                  textAlign: TextAlign.center,
+                                  //alignment: AlignmentDirectional.topStart
+                                ),
+                              ),
+                              SizedBox(
+                                height: 22.0,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  cancelRideRequest();
+                                  resetApp();
+                                },
+                                child: Container(
+                                  height: 60.0,
+                                  width: 60.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(26.0),
+                                    border: Border.all(
+                                        width: 2.0, color: Colors.grey),
+                                  ),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 26.0,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              Container(
+                                width: double.infinity,
+                                child: Text(
+                                  "Cancel Search",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 12.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
             ],
           ),
         ));
+  }
+
+  Future getAllDriverDetails() async {
+    log('message');
+    try {
+// Print the data of the snapshot
+
+      late http.Response response;
+      const url =
+          'https://rider-app-29f66-default-rtdb.firebaseio.com/Ride Request.json';
+      response = await http.get(Uri.parse(url));
+      Map body = json.decode(response.body);
+      body.forEach((key, value) {
+        log(key.toString());
+        value['key'] = key;
+        drivers.add(value);
+      });
+      for (var item in drivers) {
+        if (item['driver_id'] == 'accepting') {
+          setState(() {
+            isAccepted = true;
+          });
+        }
+      }
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   Future<void> getPlaceDirecton() async {
@@ -926,10 +998,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     });
   }
 
-  void updateAvailableDriversOnMap() {
+  void updateAvailableDriversOnMap() async {
     setState(() {
       markersSet.clear();
     });
+
+    final Uint8List pMarkerIcon =
+        await getBytesFromAsset('assets/images/car_android.png', 100);
 
     Set<Marker> tMakers = Set<Marker>();
     for (NearbyAvailableDrivers driver
@@ -940,7 +1015,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       Marker marker = Marker(
         markerId: MarkerId('driver${driver.key}'),
         position: driverAvailablePosition,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        icon: BitmapDescriptor.fromBytes(pMarkerIcon),
         rotation: AssistantMethods.createRandomNumber(360),
       );
       tMakers.add(marker);
@@ -948,6 +1023,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     setState(() {
       markersSet = tMakers;
     });
+  }
+
+  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
   }
 
   // void createIconMarker() {
