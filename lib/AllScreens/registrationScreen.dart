@@ -183,7 +183,7 @@ class registrationScreen extends StatelessWidget {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return progressDialog(message: "Registring, Please wait...");
+          return progressDialog(message: "Registering, Please wait...");
         });
 
     try {
